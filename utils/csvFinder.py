@@ -8,7 +8,11 @@ class csvFinder():
     def __init__(self , csvPath ):
         self.csvPath = csvPath 
         self.csvdata = self.read_data()
-        
+        self.blank = "-"
+    
+    def set_blank_char(self,char):
+        #กรณีต้องการเปลี่ยน "ไม่ระบุ"
+        self.blank = char
         
     
     
@@ -53,13 +57,26 @@ class csvFinder():
 
                 for i in found_data:
                     index = i["row"]
-                    i["result"] = self.csvdata[index]
+
+                    clean_data = {}
+
+                    for key,val in self.csvdata[index].items():
+                        if val.strip() == "":
+                            continue
+                        
+                        elif val.strip() == self.blank:
+                            clean_data[key] = "ไม่ได้ระบุไว้"
+
+                        else :
+                            clean_data[key] = val.strip()
+
+                    i["result"] = clean_data
 
                 found_data.sort(key=operator.itemgetter('score'), reverse=True)
                 return found_data[0:limit]
 
             else :
-                default_scoring -= 10
+                default_scoring -= 5
                 continue
     
     
@@ -108,12 +125,14 @@ class csvFinder():
                 for i in found_data:
                     index = i["row"]
                     i["result"] = self.csvdata[index][col_to_find]
+                    if i["result"].strip() == "":
+                        i["result"] = "ไม่ระบุ"
 
                 found_data.sort(key=operator.itemgetter('score'), reverse=True)
                 return found_data[0:limit]
 
             else :
-                default_scoring -= 10
+                default_scoring -= 7
                 continue
     
     
@@ -132,7 +151,7 @@ class csvFinder():
         if fuzz.ratio(val,val_to_match) >= score :
             res = [True , "fuzz_ratio" ,fuzz.ratio(val,val_to_match)]
             return res
-        # elif fuzz.partial_ratio(val,val_to_match) >= 90 :
+        # elif fuzz.partial_ratio(val,val_to_match) >= score :
         #     res = [True , "fuzz_partial_ratio" ,fuzz.partial_ratio(val,val_to_match)]
         #     return res
         # elif fuzz.token_sort_ratio(val,val_to_match) >= 90 :
@@ -142,12 +161,12 @@ class csvFinder():
     
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     
-    CSV = csvFinder(csvPath="test_csv02.csv")
+    # CSV = csvFinder(csvPath="test_csv02.csv")
     
     # ค้นหา ข้อมูล ของคำที่ใส่เข้าไป
-    res = CSV.find_row(val="ครอบสันโค้ง" , limit=5)
+    # res = CSV.find_row(val="ครอบสันโค้ง" , limit=5)
         
     # a = res2[0]["result"] #findrow
     # print(a)
@@ -155,7 +174,7 @@ if __name__ == '__main__':
     # ค้นหา คำนี้ ที่ คอลัมน์ อื่น 
     # ค้นหา รายการนี้ .. มีค่าแรงเท่าไหร่
     # res2 = CSV.find_value(val="เค้าบอกให้มาถาม รวมค่างานกลุ่มที่ 2 อ่าครับ", col_to_find="ค่าวัสดุจำนวนเงิน" , limit=50)
-    print(res)
+    # print(res)
     # for i in res2:
     #     if i["search_type"] == "fuzz_ratio":
     #         print(i)
