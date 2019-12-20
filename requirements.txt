@@ -1,0 +1,2 @@
+fuzzywuzzy==0.17.0
+python-Levenshtein-wheels==0.13.1
